@@ -32,21 +32,119 @@
 </style>
 </head>
 <div class="rangeslider">
-  <input type="range" min="2007" max="2016" value="2016"
-                  class="myslider" id="sliderRange">
+  <!-- <input type="range" min="2007" max="2016" value="2016"
+                  class="myslider" id="sliderRange"> -->
+
+  <button id="button" onclick="complement()">press here to get your mind blown</button>
   <p>Value: <span id="demo"></span></p>
 </div>
 <body>
   <script type="text/javascript">
+  var btnClicked = true;
   // Define margins
+  function complement()
+  {
+    btnClicked=!btnClicked;
+  }
   var margin = {
     top: 10,
     right: 10,
     bottom: 25,
     left: 70
   };
+  // Load the file data.csv and generate a visualisation based on it
+  d3.csv("./rapidmined2.csv", function(error, data) {
+    var s,cnames=['Pick a country']
+    // handle any data loading errors
+    if (error) {
+      console.log("Something went wrong");
+      console.log(error);
+    } else {
+      console.log("Data Loaded");
+      svg.append("text")
+      .attr("id","bgyear")
+      .attr("x",svg_width/2)
+      .attr("y",svg_height/2+300)
+      .attr("opacity",0.2)
+      .attr("font-size",200).text(display_year);
+      // Assign  the data object loaded to the global dataset variable
+      dataset = data;
+      svg.select("#x-axis").call(xAxis);
+      var filtered_dataset3 = dataset.filter(yearFilter);
+      dataset.forEach(function(d) {
+        d.GDP = +d.GDP;
+        d.Global_Competitiveness_Index = +d.Global_Competitiveness_Index;
+        d.Population=+d.Population;
+
+      });
+      var select = d3.select("div")
+   .append("select")
+
+ select
+   .on("change", function(d) {
+     var value = d3.select(this).property("value");
+   });
+
+ select.selectAll("option")
+   .data(filtered_dataset3)
+   .enter()
+     .append("option")
+     .attr("value", function (d) { return d.Country; })
+     .text(function (d) { return d.Country; });
+
+      //xScale.domain([0,d3.max(dataset,function(d){return Math.log(d.GDP,10);})])
+      xScale.domain([0,1.4*d3.max(dataset,function(d){return d.GDP;})])
+      yScale.domain([0,1.1*d3.max(dataset,function(d){return d.Global_Competitiveness_Index;})])
+      rScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
+      tScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
 
 
+      console.log("hey?");
+      // Call the x-axis
+      svg.select("#x-axis").call(xAxis);
+      svg.select("#y-axis").call(yAxis);
+      //Generate the visualisation
+      generateVis();
+      var timeoutID;
+      document.getElementById('button').addEventListener('click', function() {
+
+  if (btnClicked) {
+    console.log('Stopped');
+    clearInterval(timeoutID);
+    timeoutID = null;
+  } else {
+ timeoutID = setInterval(function() {
+        //if(!btnClicked)clearInterval(intervfn);
+        display_year = display_year + 1;
+        if (display_year > 2017) {
+          display_year = 2007;
+        }
+        // var rangeslider = document.getElementById("sliderRange");
+        var output = document.getElementById("demo");
+
+
+        d3.select("#bgyear").text(display_year)
+        output.innerHTML = display_year;
+        // rangeslider.value=display_year;
+        console.log("hey");
+
+
+            generateVis();
+      },1500)}}
+    );
+
+
+}
+});
+
+
+  function mouseOver() {
+      document.getElementById("circle").style.color = "Black";
+  }
+
+  function mouseOut() {
+      document.getElementById("circle").style.color = "red";
+  }
 
 
   //Width and height
@@ -62,15 +160,14 @@
   function yearFilter(value) {
     return (value.Year == display_year)
   }
-  var rangeslider = document.getElementById("sliderRange");
-  var output = document.getElementById("demo");
-  output.innerHTML = rangeslider.value;
 
-  rangeslider.oninput = function() {
-    output.innerHTML = this.value;
-    display_year=this.value;
-    generateVis();
-  }
+  function startTimer () {
+    timer.start();
+    setTimeout(stopTimer,2000);
+}
+function stopTimer () {
+    timer.stop;
+}
   //Create SVG element as a group with the margins transform applied to it
   var svg = d3.select("body")
   .append("svg")
@@ -83,10 +180,12 @@
   // Create a scale to scale market share values nicely for bar heights
   var yScale = d3.scalePow().exponent(2)
   .range([svg_height,0]);
+  var tScale=d3.scalePow().exponent(0.25).range([0,20]);
 
   // Create a scale object to nicely take care of positioning country along the horizontal axis
   // We don't set the domain yet as data isn't loaded
-  var xScale = d3.scalePow().exponent(0.25).range([0, svg_width]);
+   var xScale = d3.scalePow().exponent(0.25).range([0, svg_width]);
+  // var xScale = d3.scaleLog().base(Math.E).range([0, svg_width]);
 
   //xScale.domain(dataset.map(function(d) { return d.GDP; }));//Define Y axis
   var yAxis = d3.axisLeft()
@@ -99,6 +198,7 @@
 
   var rScale = d3.scaleSqrt()
   .range([0, 35]);
+
   // Call the y axis
   svg.append("g")
   .attr("class", "axis")
@@ -110,6 +210,7 @@
   .attr("id", "x-axis")
   .attr("transform", "translate(0," + svg_height + ")");
 
+
   // Define a fucntion to draw a simple bar chart
   function generateVis() {
     // Filter the data to only include the current year
@@ -120,7 +221,8 @@
     var filtered_dataset = dataset.filter(yearFilter);
     var country = svg.selectAll("circle")
     .data(filtered_dataset);
-
+    var countrytxt = svg.selectAll("#yesboi")
+    .data(filtered_dataset);
 
 
     /******** HANDLE ENTER SELECTION ************/
@@ -129,8 +231,8 @@
     country.enter()
     .append("circle")
     .attr("cx", function(d) {
-      //return xScale(Math.log(d.GDPa,power));
-      return xScale(d.GDPa);
+      //return xScale(Math.log(d.GDP,power));
+      return xScale(d.GDP);
     })
     .attr("cy", function(d) {
       return yScale(d.Global_Competitiveness_Index);
@@ -138,7 +240,9 @@
     .attr("r", function(d) {
       return rScale(d.Population);
     })
-    .style("fill",function(d){
+    .attr("stroke","black")
+    .attr("stroke-width",1)
+    .attr("fill",function(d){
         if(d.Forum_classification=="Europe and North America")
         {
         return "LightBlue";
@@ -158,18 +262,32 @@
       if(d.Forum_classification=="Middle East and North Africa")
           {return "Gold";}
             console.log(d.Forum_classification);})
-            .style("opacity",.8);
+            .attr("opacity",.8);
 
-const circles = document.querySelectorAll('.circle');
-  circles.forEach(circle => circle.dataset.fill === 'Black' ?console.log(`${dataset.Country} is not working!`) : undefined)
 
     /******** HANDLE UPDATE SELECTION ************/
     // Update the display of existing elelemnts to mathc new data
+    // filtered_dataset.forEach(function(d) {
+    //   d3.select("svg").select("#d.Country")
+    countrytxt.enter().append("text").attr("id","yesboi").attr("x",function(d){ return xScale(d.GDP)})
+    .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
+    .text(function(d){return d.Country;})
+    .attr("font-size", function (d)  { return tScale(d.Population)-1})
+
+      countrytxt.attr("x",function(d){ return xScale(d.GDP)})
+      .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
+          .text(function(d){return d.Country;})
+          .attr("font-size", function (d)  { return tScale(d.Population)})
+    //  console.log(d.Year)
+  //  });
+  countrytxt.exit().remove()
+
+
     country.transition()
     .duration(500)
     .ease(d3.easeLinear).attr("cx", function(d) {
-    //  return xScale(Math.log(d.GDPa,power));
-    return xScale(d.GDPa);
+    //  return xScale(Math.log(d.GDP,power));
+    return xScale(d.GDP);
     })
     .attr("cy", function(d) {
       return yScale(+d.Global_Competitiveness_Index);
@@ -177,7 +295,7 @@ const circles = document.querySelectorAll('.circle');
     .attr("r", function(d) {
       return rScale(d.Population);
     })
-    .style("fill",function(d){
+    .attr("fill",function(d){
 
         if(d.Forum_classification=="Europe and North America")
         {
@@ -197,7 +315,7 @@ const circles = document.querySelectorAll('.circle');
           return "rgb(210, 245, 60)";}
       if(d.Forum_classification=="Middle East and North Africa")
           {return "Gold";}
-            console.log(d.Forum_classification);}).style("opacity",.8);
+            console.log(d.Forum_classification);}).attr("opacity",.8);
 
 
 
@@ -211,52 +329,7 @@ const circles = document.querySelectorAll('.circle');
 
     }
 var power =123;
-    // Load the file data.csv and generate a visualisation based on it
-    d3.csv("./rapidmined.csv", function(error, data) {
 
-      // handle any data loading errors
-      if (error) {
-        console.log("Something went wrong");
-        console.log(error);
-      } else {
-        console.log("Data Loaded");
-
-        // Assign  the data object loaded to the global dataset variable
-        dataset = data;
-        //svg.select("#x-axis").call(xAxis);
-        dataset.forEach(function(d) {
-          d.GDPa = +d.GDPa;
-        });
-        dataset.forEach(function(d) {
-          d.Global_Competitiveness_Index = +d.Global_Competitiveness_Index;
-        });
-        dataset.forEach(function(d) {
-          d.Population=+d.Population;
-        });
-        var filtered_dataset = dataset.filter(yearFilter);
-        //xScale.domain([0,d3.max(dataset,function(d){return Math.log(d.GDPa,10);})])
-        xScale.domain([0,d3.max(dataset,function(d){return d.GDPa;})])
-        yScale.domain([0,d3.max(dataset,function(d){return d.Global_Competitiveness_Index;})])
-        rScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
-
-        console.log("hey?");
-        // Call the x-axis
-        svg.select("#x-axis").call(xAxis);
-        svg.select("#y-axis").call(yAxis);
-        //Generate the visualisation
-        generateVis();
-        setInterval(function() {
-          display_year = display_year + 1;
-          if (display_year > 2016) {
-            display_year = 2007;
-          }
-          output.innerHTML = display_year;
-          rangeslider.value=display_year;
-          console.log("hey");
-          generateVis();
-        },2000);
-      }
-    });
     </script>
   </div>
 </body>

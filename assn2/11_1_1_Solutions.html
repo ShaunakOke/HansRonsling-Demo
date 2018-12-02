@@ -37,6 +37,9 @@
 
   <button id="button" onclick="complement()">press here to get your mind blown</button>
   <p>Value: <span id="demo"></span></p>
+  <select id="dropdownb">
+    <option id="blabla" value="nope">enter value here</option>
+        </select>
 </div>
 <body>
   <script type="text/javascript">
@@ -78,31 +81,39 @@
 
       });
       var select = d3.select("div")
-   .append("select")
+   .select("select")   .attr("id","dropdownb")
 
  select
    .on("change", function(d) {
      var value = d3.select(this).property("value");
+    display_yeartrace=2007;
    });
-
- select.selectAll("option")
+var flag=0;
+ select.selectAll("efasdfadfssdfadsf")
    .data(filtered_dataset3)
-   .enter()
-     .append("option")
-     .attr("value", function (d) { return d.Country; })
-     .text(function (d) { return d.Country; });
-
+  .enter()
+   .append("option")
+       .attr("value",function(d){return d.Country;})
+       .text(function (d) { return d.Country; })
+var count=0;
       //xScale.domain([0,d3.max(dataset,function(d){return Math.log(d.GDP,10);})])
       xScale.domain([0,1.4*d3.max(dataset,function(d){return d.GDP;})])
       yScale.domain([0,1.1*d3.max(dataset,function(d){return d.Global_Competitiveness_Index;})])
       rScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
       tScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
 
-
+  d3.csv("./pillarsdat.csv", function(error, data2) {
+    dataset3=data2
+      xScale2.domain(dataset3.map(function(d){
+      return d.Pillars; }));});
       console.log("hey?");
       // Call the x-axis
       svg.select("#x-axis").call(xAxis);
       svg.select("#y-axis").call(yAxis);
+      svg2.select("#x-axis2").call(xAxis);
+      svg2.select("#y-axis2").call(yAxis);
+      svg3.select("#x-axis3").call(xAxis2);
+      svg3.select("#y-axis3").call(yAxis2);
       //Generate the visualisation
       generateVis();
       var timeoutID;
@@ -119,7 +130,7 @@
         if (display_year > 2017) {
           display_year = 2007;
         }
-        // var rangeslider = document.getElementById("sliderRange");
+
         var output = document.getElementById("demo");
 
 
@@ -127,26 +138,13 @@
         output.innerHTML = display_year;
         // rangeslider.value=display_year;
         console.log("hey");
-
-
-            generateVis();
+        generateVis();
       },1500)}}
     );
 
 
 }
 });
-
-
-  function mouseOver() {
-      document.getElementById("circle").style.color = "Black";
-  }
-
-  function mouseOut() {
-      document.getElementById("circle").style.color = "red";
-  }
-
-
   //Width and height
   var outer_width = 1000;
   var outer_height = 700;
@@ -155,19 +153,18 @@
 
   // The year to display
   display_year = 2007;
-
+  display_yeartrace=2007;
   // define a function that filters data by year
   function yearFilter(value) {
     return (value.Year == display_year)
   }
 
-  function startTimer () {
-    timer.start();
-    setTimeout(stopTimer,2000);
-}
-function stopTimer () {
-    timer.stop;
-}
+  function yearFiltertrace(value) {
+    var sel = document.getElementById('dropdownb');
+    return (value.Country == sel.value)
+  }
+
+
   //Create SVG element as a group with the margins transform applied to it
   var svg = d3.select("body")
   .append("svg")
@@ -177,27 +174,52 @@ function stopTimer () {
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // Create a scale to scale market share values nicely for bar heights
+  var svg2 = d3.select("body")
+  .append("svg")
+  .attr("width", svg_width + margin.left + margin.right)
+  .attr("height", svg_height + margin.top + margin.bottom)
+  .attr("background","AliceBlue")
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var svg3 = d3.select("body")
+  .append("svg")
+  .attr("width", svg_width + margin.left + margin.right)
+  .attr("height", svg_height + margin.top + margin.bottom)
+  .attr("background","AliceBlue")
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
   var yScale = d3.scalePow().exponent(2)
   .range([svg_height,0]);
   var tScale=d3.scalePow().exponent(0.25).range([0,20]);
 
-  // Create a scale object to nicely take care of positioning country along the horizontal axis
-  // We don't set the domain yet as data isn't loaded
+
    var xScale = d3.scalePow().exponent(0.25).range([0, svg_width]);
   // var xScale = d3.scaleLog().base(Math.E).range([0, svg_width]);
+   var xScale2 = d3.scaleBand().range([0, svg_width]);
+   var yScale2 = d3.scaleLinear().domain([0,7]).range([svg_height, 0]);
 
-  //xScale.domain(dataset.map(function(d) { return d.GDP; }));//Define Y axis
+   var xAxis = d3.axisBottom()
+   .scale(xScale).ticks(5);
   var yAxis = d3.axisLeft()
   .scale(yScale)
   .ticks(5);
 
-  // Create an x-axis connected to the x scale
-  var xAxis = d3.axisBottom()
-  .scale(xScale).ticks(5);
+
+  var yAxis2 = d3.axisLeft()
+  .scale(yScale2)
+
+  var xAxis2 = d3.axisBottom()
+  .scale(xScale2);
+
+
+
+
+
 
   var rScale = d3.scaleSqrt()
-  .range([0, 35]);
+  .range([0, 60]);
 
   // Call the y axis
   svg.append("g")
@@ -210,23 +232,77 @@ function stopTimer () {
   .attr("id", "x-axis")
   .attr("transform", "translate(0," + svg_height + ")");
 
+  // Call the y axis
+  svg2.append("g")
+  .attr("class", "axis")
+  .attr("id", "y-axis2");
+
+  // All but call the x-axis
+  svg2.append("g")
+  .attr("class", "axis")
+  .attr("id", "x-axis2")
+  .attr("transform", "translate(0," + svg_height + ")");
+
+  svg3.append("g")
+  .attr("class", "axis")
+  .attr("id", "y-axis3");
+
+  svg3.append("g")
+  .attr("class", "axis")
+  .attr("id", "x-axis3")
+  .attr("transform", "translate(0," + svg_height + ")");
 
   // Define a fucntion to draw a simple bar chart
-  function generateVis() {
+  function generateVis()
+  {
     // Filter the data to only include the current year
-
-
+var sel = document.getElementById('dropdownb');
+console.log(sel.value)
     /******** PERFORM DATA JOIN ************/
     // Join new data with old elements, if any.
     var filtered_dataset = dataset.filter(yearFilter);
+    var filtered_dataset4 = dataset.filter(yearFiltertrace);
     var country = svg.selectAll("circle")
     .data(filtered_dataset);
-    var countrytxt = svg.selectAll("#yesboi")
+    var countrytxt = svg.selectAll("#text1")
     .data(filtered_dataset);
-
-
+    var countrytrace=svg2.selectAll("circle")
+    .data(dataset);
+    var countrytxtrace = svg2.selectAll("#text2")
+    .data(filtered_dataset4);
+    var barchart=svg3.selectAll("rect")
+    .data(filtered_dataset4);
     /******** HANDLE ENTER SELECTION ************/
-    // Create new elements in the dataset
+    //Create new elements in the dataset
+
+    barchart.enter()
+    .append("rect")
+    .attr("x",function(d){
+      return xScale2(d.Pillars)
+    })
+    .attr("y", function(d) {
+       return yScale2(+d.Pillars) ;
+    })
+    .attr("width", xScale2.bandwidth())
+    .attr("height", function(d) {
+       return svg_height - yScale2(d.Pillars);
+    })
+    .style("fill", "Green");
+
+    countrytrace.enter()
+    .data(dataset)
+    .append("circle")
+    .attr("cx", function(d) {
+      //return xScale(Math.log(d.GDP,power));
+      return xScale(d.GDP);
+    })
+    .attr("cy", function(d) {
+      return yScale(d.Global_Competitiveness_Index);
+    })
+    .attr("r", function(d) {
+      return rScale(d.Population);
+    })
+
 
     country.enter()
     .append("circle")
@@ -265,14 +341,16 @@ function stopTimer () {
             .attr("opacity",.8);
 
 
+            // var countrytrace=svg2.selectAll("circle")
+            // .data(filtered_dataset4);
     /******** HANDLE UPDATE SELECTION ************/
     // Update the display of existing elelemnts to mathc new data
     // filtered_dataset.forEach(function(d) {
     //   d3.select("svg").select("#d.Country")
-    countrytxt.enter().append("text").attr("id","yesboi").attr("x",function(d){ return xScale(d.GDP)})
+    countrytxt.enter().append("text").attr("id","text1").attr("x",function(d){ return xScale(d.GDP)})
     .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
     .text(function(d){return d.Country;})
-    .attr("font-size", function (d)  { return tScale(d.Population)-1})
+    .attr("font-size", function (d)  { return tScale(d.Population)})
 
       countrytxt.attr("x",function(d){ return xScale(d.GDP)})
       .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
@@ -281,6 +359,26 @@ function stopTimer () {
     //  console.log(d.Year)
   //  });
   countrytxt.exit().remove()
+
+  countrytxtrace.enter().append("text").attr("id","text2").attr("x",function(d){ return xScale(d.GDP)})
+  .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
+  .text(function(d){return d.Country+"   "+d.Year;})
+  .attr("font-size", function (d)  {if(sel.value==d.Country){ return tScale(d.Population)}
+else {
+  return 0;
+}})
+
+    countrytxtrace.attr("x",function(d){ return xScale(d.GDP)})
+    .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
+        .text(function(d){return d.Country+"   "+d.Year;})
+        .attr("font-size", function (d)  {if(sel.value==d.Country){ return tScale(d.Population)-1}
+      else {
+        return 0;
+      }})
+
+  //  console.log(d.Year)
+//  });
+
 
 
     country.transition()
@@ -317,13 +415,51 @@ function stopTimer () {
           {return "Gold";}
             console.log(d.Forum_classification);}).attr("opacity",.8);
 
+            countrytrace=0;
+            countrytrace=svg2.selectAll("circle")
+            .data(filtered_dataset4);
+            countrytrace.transition()
 
+            .duration(500)
+            .ease(d3.easeLinear).attr("cx", function(d) {
+            //  return xScale(Math.log(d.GDP,power));
+            return xScale(d.GDP);
+            })
+            .attr("cy", function(d) {
+              return yScale(+d.Global_Competitiveness_Index);
+            })
+            .attr("r", function(d) {
+              return rScale(d.Population);
+            })
+            .attr("fill",function(d){
 
+                if(d.Forum_classification=="Europe and North America")
+                {
+                return "LightBlue";
+                }
+                if(d.Forum_classification=="Eurasia")
+                {return "Crimson";}
+                if(d.Forum_classification=="Sub-Saharan Africa")
+                {return "rgb(0, 30, 160)"}
+                if(d.Forum_classification=="Latin America and the Caribbean")
+                {
+                  return "rgb(145, 30, 180)"}
+                if(d.Forum_classification=="East Asia and Pacific")
+                {return "LightGreen";}
+                if(d.Forum_classification=="South Asia")
+                {
+                  return "rgb(210, 245, 60)";}
+              if(d.Forum_classification=="Middle East and North Africa")
+                  {return "Gold";}
+                    console.log(d.Forum_classification);}).attr("opacity",.8);
 
       /******** HANDLE EXIT SELECTION ************/
       // Remove country that not longer have a matching data eleement
       country.exit().remove();
 
+        dataset.forEach(function(d) {if(sel.value!=d.Country){
+countrytrace.exit().remove()
+      }});
       // Set the year label
       d3.select("#year_header").text("Year: " + display_year)
 

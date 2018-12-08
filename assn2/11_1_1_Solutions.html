@@ -2,472 +2,657 @@
 <html lang="en" class="tas-com">
 
 <head>
-  <meta charset="utf-8">
-  <title>D3: Updating Data Joins</title>
-  <link href="./themes/prism.css" rel="stylesheet" />
-  <link href="./themes/tas_style.css" rel="stylesheet" />
-  <script type="text/javascript" src="./d3/d3.v4.js" charset="utf-8"></script>
-  <script src="./lib/prism.js" charset="utf-8"></script>
-  <style type="text/css">
-  .axis path,
-  .axis line {
-    fill: none;
-    stroke: black;
-    shape-rendering: crispEdges;
-  }
-  .axis text {
-    font-family: sans-serif;
-    font-size: 11px;
-}
-.rangeslider{
-    width: 50%;
-    }
-    .myslider {
-    -webkit-appearance: none;
-    background: #FCF3CF  ;
-    width: 50%;
-    height: 20px;
-    opacity: 2;
-   }
-</style>
+    <meta charset="utf-8">
+    <title>D3: Updating Data Joins</title>
+    <link href="./themes/prism.css" rel="stylesheet" />
+    <link href="./themes/tas_style.css" rel="stylesheet" />
+    <script type="text/javascript" src="./d3/d3.v4.js" charset="utf-8"></script>
+    <script src="./lib/prism.js" charset="utf-8"></script>
+    <style type="text/css">
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 11px;
+        }
+
+        .rangeslider {
+            width: 50%;
+        }
+
+        .myslider {
+            -webkit-appearance: none;
+            background: #FCF3CF;
+            width: 50%;
+            height: 20px;
+            opacity: 2;
+        }
+    </style>
 </head>
-<div class="rangeslider">
-  <!-- <input type="range" min="2007" max="2016" value="2016"
-                  class="myslider" id="sliderRange"> -->
-
-  <button id="button" onclick="complement()">press here to get your mind blown</button>
-  <p>Value: <span id="demo"></span></p>
-  <select id="dropdownb">
-    <option id="blabla" value="nope">enter value here</option>
-        </select>
+<div>
+    <button id="button" onclick="complement()">press here to get your mind blown</button>
+    <p>Value: <span id="demo"></span></p>
+    <select id="dropdownb">
+        <option id="blabla">enter value here</option>
+    </select>
+    <select id="dropdownb2">
+        <option id="blabla">enter value here</option>
+    </select>
 </div>
+
 <body>
-  <script type="text/javascript">
-  var btnClicked = true;
-  // Define margins
-  function complement()
-  {
-    btnClicked=!btnClicked;
-  }
-  var margin = {
-    top: 10,
-    right: 10,
-    bottom: 25,
-    left: 70
-  };
-  // Load the file data.csv and generate a visualisation based on it
-  d3.csv("./rapidmined2.csv", function(error, data) {
-    var s,cnames=['Pick a country']
-    // handle any data loading errors
-    if (error) {
-      console.log("Something went wrong");
-      console.log(error);
-    } else {
-      console.log("Data Loaded");
-      svg.append("text")
-      .attr("id","bgyear")
-      .attr("x",svg_width/2)
-      .attr("y",svg_height/2+300)
-      .attr("opacity",0.2)
-      .attr("font-size",200).text(display_year);
-      // Assign  the data object loaded to the global dataset variable
-      dataset = data;
-      svg.select("#x-axis").call(xAxis);
-      var filtered_dataset3 = dataset.filter(yearFilter);
-      dataset.forEach(function(d) {
-        d.GDP = +d.GDP;
-        d.Global_Competitiveness_Index = +d.Global_Competitiveness_Index;
-        d.Population=+d.Population;
+    <script type="text/javascript">
+        var btnClicked = true;
 
-      });
-      var select = d3.select("div")
-   .select("select")   .attr("id","dropdownb")
+        function complement() {
+            btnClicked = !btnClicked;
+        }
+        var margin = {
+            top: 10,
+            right: 10,
+            bottom: 25,
+            left: 70
+        };
+        var pillardata = []
+        var pillarname = []
+        // Load the file data.csv and generate a visualisation based on it
+        d3.csv("./rapidmined2.csv", function(error, data) {
+            var s, cnames = ['Pick a country']
+            // handle any data loading errors
+            if (error) {
+                console.log("Something went wrong");
+                console.log(error);
+            } else {
+                console.log("Data Loaded");
+                svg.append("text")
+                    .attr("id", "bgyear")
+                    .attr("x", svg_width / 2)
+                    .attr("y", svg_height / 2 + 300)
+                    .attr("opacity", 0.2)
+                    .attr("font-size", 200).text(display_year);
+                // Assign  the data object loaded to the global dataset variable
+                dataset = data;
+                svg.select("#x-axis").call(xAxis);
+                var filtered_dataset3 = dataset.filter(yearFilter);
+                dataset.forEach(function(d) {
+                    d.GDP = +d.GDP;
+                    d.Global_Competitiveness_Index = +d.Global_Competitiveness_Index;
+                    d.Population = +d.Population;
 
- select
-   .on("change", function(d) {
-     var value = d3.select(this).property("value");
-    display_yeartrace=2007;
-   });
-var flag=0;
- select.selectAll("efasdfadfssdfadsf")
-   .data(filtered_dataset3)
-  .enter()
-   .append("option")
-       .attr("value",function(d){return d.Country;})
-       .text(function (d) { return d.Country; })
-var count=0;
-      //xScale.domain([0,d3.max(dataset,function(d){return Math.log(d.GDP,10);})])
-      xScale.domain([0,1.4*d3.max(dataset,function(d){return d.GDP;})])
-      yScale.domain([0,1.1*d3.max(dataset,function(d){return d.Global_Competitiveness_Index;})])
-      rScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
-      tScale.domain([0,d3.max(dataset,function(d){return d.Population;})])
+                });
+                var select = d3.select("div")
+                    .select("#dropdownb") //.attr("id","dropdownb")
 
-  d3.csv("./pillarsdat.csv", function(error, data2) {
-    dataset3=data2
-      xScale2.domain(dataset3.map(function(d){
-      return d.Pillars; }));});
-      console.log("hey?");
-      // Call the x-axis
-      svg.select("#x-axis").call(xAxis);
-      svg.select("#y-axis").call(yAxis);
-      svg2.select("#x-axis2").call(xAxis);
-      svg2.select("#y-axis2").call(yAxis);
-      svg3.select("#x-axis3").call(xAxis2);
-      svg3.select("#y-axis3").call(yAxis2);
-      //Generate the visualisation
-      generateVis();
-      var timeoutID;
-      document.getElementById('button').addEventListener('click', function() {
+                select
+                    .on("change", function(d) {
+                        var value = d3.select(this).property("value");
+                    });
+                var flag = 0;
+                select.selectAll("dboxes")
+                    .data(filtered_dataset3)
+                    .enter()
+                    .append("option")
+                    .attr("value", function(d) {
+                        return d.Country;
+                    })
+                    .text(function(d) {
+                        return d.Country;
+                    })
 
-  if (btnClicked) {
-    console.log('Stopped');
-    clearInterval(timeoutID);
-    timeoutID = null;
-  } else {
- timeoutID = setInterval(function() {
-        //if(!btnClicked)clearInterval(intervfn);
-        display_year = display_year + 1;
-        if (display_year > 2017) {
-          display_year = 2007;
+
+                var select2 = d3.select("div")
+                    .select("#dropdownb2") //  .attr("id","dropdownb2")
+
+                select2
+                    .on("change", function(d) {
+                        var value2 = d3.select(this).property("value");
+                    });
+                var flag = 0;
+                select2.selectAll("efasdfadfssdfadsf")
+                    .data(filtered_dataset3)
+                    .enter()
+                    .append("option")
+                    .attr("value", function(d) {
+                        return d.Country;
+                    })
+                    .text(function(d) {
+                        return d.Country;
+                    })
+                var count = 0;
+                //xScale.domain([0,d3.max(dataset,function(d){return Math.log(d.GDP,10);})])
+                xScale.domain([d3.min(dataset, function(d) {
+                    return d.GDP
+                }), 1.5 * d3.max(dataset, function(d) {
+                    return d.GDP;
+                })])
+                yScale.domain([d3.min(dataset, function(d) {
+                    return d.Global_Competitiveness_Index
+                }), 1.1 * d3.max(dataset, function(d) {
+                    return d.Global_Competitiveness_Index;
+                })])
+                rScale.domain([0, d3.max(dataset, function(d) {
+                    return d.Population;
+                })])
+                tScale.domain([0, d3.max(dataset, function(d) {
+                    return d.Population;
+                })])
+
+
+
+                d3.csv("./pillarsdat.csv", function(error, data2) {
+
+                    xScale2.domain(data2.map(function(d) {
+                        return d.Pillars;
+                    }));
+                    data2.forEach(function(d) {
+                        pillarname.push(d.Pillars)
+                    })
+
+                    xScale2.domain(pillarname)
+                    svg3.select("#x-axis3").call(xAxis2).selectAll("text")
+                        .style("text-anchor", "end")
+                        .attr("dx", "-.8em")
+                        .attr("dy", ".15em")
+                        .attr("transform", function(d) {
+                            return "rotate(-65)"
+                        });
+                });
+
+
+
+
+                console.log("hey?");
+                // Call the x-axis
+                svg.select("#x-axis").call(xAxis);
+                svg.select("#y-axis").call(yAxis);
+                svg2.select("#x-axis2").call(xAxis);
+                svg2.select("#y-axis2").call(yAxis);
+
+                svg3.select("#y-axis3").call(yAxis2);
+                //Generate the visualisation
+                generateVis();
+                var timeoutID;
+                document.getElementById('button').addEventListener('click', function() {
+
+                    if (btnClicked) {
+                        console.log('Stopped');
+                        clearInterval(timeoutID);
+                        timeoutID = null;
+                    } else {
+                        timeoutID = setInterval(function() {
+                            //if(!btnClicked)clearInterval(intervfn);
+                            display_year = display_year + 1;
+                            svg3.selectAll("*").remove();
+                            svg3.append("g")
+                                .attr("class", "axis")
+                                .attr("id", "y-axis3");
+
+                            svg3.append("g")
+                                .attr("class", "axis")
+                                .attr("id", "x-axis3")
+                                .attr("transform", "translate(0," + svg_height + ")")
+                            svg3.select("#x-axis3").call(xAxis2).selectAll("text")
+                                .style("text-anchor", "end")
+                                .attr("dx", "-.8em")
+                                .attr("dy", ".15em")
+                                .attr("transform", function(d) {
+                                    return "rotate(-65)"
+                                });
+                            svg3.select("#y-axis3").call(yAxis2);
+                            if (display_year > 2017) {
+                                display_year = 2007;
+                            }
+
+                            var output = document.getElementById("demo");
+
+
+                            d3.select("#bgyear").text(display_year)
+                            output.innerHTML = display_year;
+                            // rangeslider.value=display_year;
+                            console.log("hey");
+                            generateVis();
+                        }, 1500)
+                    }
+                });
+
+
+            }
+        });
+        //Width and height
+        var outer_width = 1500;
+        var outer_height = 900;
+        var svg_width = outer_width - margin.left - margin.right;
+        var svg_height = outer_height - margin.top - margin.bottom;
+
+        // The year to display
+        display_year = 2007;
+        display_yeartrace = 2007;
+        // define a function that filters data by year
+        function yearFilter(value) {
+            return (value.Year == display_year)
         }
 
-        var output = document.getElementById("demo");
-
-
-        d3.select("#bgyear").text(display_year)
-        output.innerHTML = display_year;
-        // rangeslider.value=display_year;
-        console.log("hey");
-        generateVis();
-      },1500)}}
-    );
-
-
-}
-});
-  //Width and height
-  var outer_width = 1000;
-  var outer_height = 700;
-  var svg_width = outer_width - margin.left - margin.right;
-  var svg_height = outer_height - margin.top - margin.bottom;
-
-  // The year to display
-  display_year = 2007;
-  display_yeartrace=2007;
-  // define a function that filters data by year
-  function yearFilter(value) {
-    return (value.Year == display_year)
-  }
-
-  function yearFiltertrace(value) {
-    var sel = document.getElementById('dropdownb');
-    return (value.Country == sel.value)
-  }
-
-
-  //Create SVG element as a group with the margins transform applied to it
-  var svg = d3.select("body")
-  .append("svg")
-  .attr("width", svg_width + margin.left + margin.right)
-  .attr("height", svg_height + margin.top + margin.bottom)
-  .attr("background","AliceBlue")
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  var svg2 = d3.select("body")
-  .append("svg")
-  .attr("width", svg_width + margin.left + margin.right)
-  .attr("height", svg_height + margin.top + margin.bottom)
-  .attr("background","AliceBlue")
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  var svg3 = d3.select("body")
-  .append("svg")
-  .attr("width", svg_width + margin.left + margin.right)
-  .attr("height", svg_height + margin.top + margin.bottom)
-  .attr("background","AliceBlue")
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  var yScale = d3.scalePow().exponent(2)
-  .range([svg_height,0]);
-  var tScale=d3.scalePow().exponent(0.25).range([0,20]);
-
-
-   var xScale = d3.scalePow().exponent(0.25).range([0, svg_width]);
-  // var xScale = d3.scaleLog().base(Math.E).range([0, svg_width]);
-   var xScale2 = d3.scaleBand().range([0, svg_width]);
-   var yScale2 = d3.scaleLinear().domain([0,7]).range([svg_height, 0]);
-
-   var xAxis = d3.axisBottom()
-   .scale(xScale).ticks(5);
-  var yAxis = d3.axisLeft()
-  .scale(yScale)
-  .ticks(5);
-
-
-  var yAxis2 = d3.axisLeft()
-  .scale(yScale2)
-
-  var xAxis2 = d3.axisBottom()
-  .scale(xScale2);
-
-
-
-
-
-
-  var rScale = d3.scaleSqrt()
-  .range([0, 60]);
-
-  // Call the y axis
-  svg.append("g")
-  .attr("class", "axis")
-  .attr("id", "y-axis");
-
-  // All but call the x-axis
-  svg.append("g")
-  .attr("class", "axis")
-  .attr("id", "x-axis")
-  .attr("transform", "translate(0," + svg_height + ")");
-
-  // Call the y axis
-  svg2.append("g")
-  .attr("class", "axis")
-  .attr("id", "y-axis2");
-
-  // All but call the x-axis
-  svg2.append("g")
-  .attr("class", "axis")
-  .attr("id", "x-axis2")
-  .attr("transform", "translate(0," + svg_height + ")");
-
-  svg3.append("g")
-  .attr("class", "axis")
-  .attr("id", "y-axis3");
-
-  svg3.append("g")
-  .attr("class", "axis")
-  .attr("id", "x-axis3")
-  .attr("transform", "translate(0," + svg_height + ")");
-
-  // Define a fucntion to draw a simple bar chart
-  function generateVis()
-  {
-    // Filter the data to only include the current year
-var sel = document.getElementById('dropdownb');
-console.log(sel.value)
-    /******** PERFORM DATA JOIN ************/
-    // Join new data with old elements, if any.
-    var filtered_dataset = dataset.filter(yearFilter);
-    var filtered_dataset4 = dataset.filter(yearFiltertrace);
-    var country = svg.selectAll("circle")
-    .data(filtered_dataset);
-    var countrytxt = svg.selectAll("#text1")
-    .data(filtered_dataset);
-    var countrytrace=svg2.selectAll("circle")
-    .data(dataset);
-    var countrytxtrace = svg2.selectAll("#text2")
-    .data(filtered_dataset4);
-    var barchart=svg3.selectAll("rect")
-    .data(filtered_dataset4);
-    /******** HANDLE ENTER SELECTION ************/
-    //Create new elements in the dataset
-
-    barchart.enter()
-    .append("rect")
-    .attr("x",function(d){
-      return xScale2(d.Pillars)
-    })
-    .attr("y", function(d) {
-       return yScale2(+d.Pillars) ;
-    })
-    .attr("width", xScale2.bandwidth())
-    .attr("height", function(d) {
-       return svg_height - yScale2(d.Pillars);
-    })
-    .style("fill", "Green");
-
-    countrytrace.enter()
-    .data(dataset)
-    .append("circle")
-    .attr("cx", function(d) {
-      //return xScale(Math.log(d.GDP,power));
-      return xScale(d.GDP);
-    })
-    .attr("cy", function(d) {
-      return yScale(d.Global_Competitiveness_Index);
-    })
-    .attr("r", function(d) {
-      return rScale(d.Population);
-    })
-
-
-    country.enter()
-    .append("circle")
-    .attr("cx", function(d) {
-      //return xScale(Math.log(d.GDP,power));
-      return xScale(d.GDP);
-    })
-    .attr("cy", function(d) {
-      return yScale(d.Global_Competitiveness_Index);
-    })
-    .attr("r", function(d) {
-      return rScale(d.Population);
-    })
-    .attr("stroke","black")
-    .attr("stroke-width",1)
-    .attr("fill",function(d){
-        if(d.Forum_classification=="Europe and North America")
-        {
-        return "LightBlue";
+        function yearFiltertrace(value) {
+            var sel = document.getElementById('dropdownb');
+            return (value.Country == sel.value)
         }
-        if(d.Forum_classification=="Eurasia")
-        {return "Crimson";}
-        if(d.Forum_classification=="Sub-Saharan Africa")
-        {return "rgb(0, 30, 160)"}
-        if(d.Forum_classification=="Latin America and the Caribbean")
-        {
-          return "rgb(145, 30, 180)"}
-        if(d.Forum_classification=="East Asia and Pacific")
-        {return "LightGreen";}
-        if(d.Forum_classification=="South Asia")
-        {
-          return "rgb(210, 245, 60)";}
-      if(d.Forum_classification=="Middle East and North Africa")
-          {return "Gold";}
-            console.log(d.Forum_classification);})
-            .attr("opacity",.8);
 
-
-            // var countrytrace=svg2.selectAll("circle")
-            // .data(filtered_dataset4);
-    /******** HANDLE UPDATE SELECTION ************/
-    // Update the display of existing elelemnts to mathc new data
-    // filtered_dataset.forEach(function(d) {
-    //   d3.select("svg").select("#d.Country")
-    countrytxt.enter().append("text").attr("id","text1").attr("x",function(d){ return xScale(d.GDP)})
-    .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
-    .text(function(d){return d.Country;})
-    .attr("font-size", function (d)  { return tScale(d.Population)})
-
-      countrytxt.attr("x",function(d){ return xScale(d.GDP)})
-      .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
-          .text(function(d){return d.Country;})
-          .attr("font-size", function (d)  { return tScale(d.Population)})
-    //  console.log(d.Year)
-  //  });
-  countrytxt.exit().remove()
-
-  countrytxtrace.enter().append("text").attr("id","text2").attr("x",function(d){ return xScale(d.GDP)})
-  .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
-  .text(function(d){return d.Country+"   "+d.Year;})
-  .attr("font-size", function (d)  {if(sel.value==d.Country){ return tScale(d.Population)}
-else {
-  return 0;
-}})
-
-    countrytxtrace.attr("x",function(d){ return xScale(d.GDP)})
-    .attr("y",function(d) {return yScale(d.Global_Competitiveness_Index)})
-        .text(function(d){return d.Country+"   "+d.Year;})
-        .attr("font-size", function (d)  {if(sel.value==d.Country){ return tScale(d.Population)-1}
-      else {
-        return 0;
-      }})
-
-  //  console.log(d.Year)
-//  });
-
-
-
-    country.transition()
-    .duration(500)
-    .ease(d3.easeLinear).attr("cx", function(d) {
-    //  return xScale(Math.log(d.GDP,power));
-    return xScale(d.GDP);
-    })
-    .attr("cy", function(d) {
-      return yScale(+d.Global_Competitiveness_Index);
-    })
-    .attr("r", function(d) {
-      return rScale(d.Population);
-    })
-    .attr("fill",function(d){
-
-        if(d.Forum_classification=="Europe and North America")
-        {
-        return "LightBlue";
+        function yearFiltertrace2(value) {
+            var sel = document.getElementById('dropdownb');
+            var sel2 = document.getElementById('dropdownb2');
+            return (value.Country == sel.value || value.Country == sel2.value)
         }
-        if(d.Forum_classification=="Eurasia")
-        {return "Crimson";}
-        if(d.Forum_classification=="Sub-Saharan Africa")
-        {return "rgb(0, 30, 160)"}
-        if(d.Forum_classification=="Latin America and the Caribbean")
-        {
-          return "rgb(145, 30, 180)"}
-        if(d.Forum_classification=="East Asia and Pacific")
-        {return "LightGreen";}
-        if(d.Forum_classification=="South Asia")
-        {
-          return "rgb(210, 245, 60)";}
-      if(d.Forum_classification=="Middle East and North Africa")
-          {return "Gold";}
-            console.log(d.Forum_classification);}).attr("opacity",.8);
 
-            countrytrace=0;
-            countrytrace=svg2.selectAll("circle")
-            .data(filtered_dataset4);
+
+        //Create SVG element as a group with the margins transform applied to it
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", svg_width + margin.left + margin.right)
+            .attr("height", svg_height + margin.top + margin.bottom)
+            .attr("background", "AliceBlue")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var svg2 = d3.select("body")
+            .append("svg")
+            .attr("width", svg_width + margin.left + margin.right)
+            .attr("height", svg_height + margin.top + margin.bottom)
+            .attr("background", "AliceBlue")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var svg3 = d3.select("body")
+            .append("svg")
+            .attr("width", svg_width + margin.left + margin.right)
+            .attr("height", svg_height + margin.top + margin.bottom + 300)
+            //.attr("background","AliceBlue")
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var yScale = d3.scalePow().exponent(1.8).range([svg_height, 0]);
+        var tScale = d3.scalePow().exponent(0.25).range([4, 20]);
+        var xScale = d3.scalePow().exponent(0.25).range([0, svg_width]);
+        var xScale2 = d3.scaleBand().range([0, svg_width]);
+        var yScale2 = d3.scaleLinear().domain([0, 7]).range([svg_height, 0]);
+
+        var xAxis = d3.axisBottom()
+            .scale(xScale).ticks(5);
+        var yAxis = d3.axisLeft()
+            .scale(yScale)
+            .ticks(5);
+
+
+        var yAxis2 = d3.axisLeft()
+            .scale(yScale2)
+
+        var xAxis2 = d3.axisBottom()
+            .scale(xScale2);
+
+        var rScale = d3.scaleSqrt()
+            .range([0, 60]);
+
+        // Call the y axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("id", "y-axis");
+
+        // All but call the x-axis
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("id", "x-axis")
+            .attr("transform", "translate(0," + svg_height + ")");
+
+        // Call the y axis
+        svg2.append("g")
+            .attr("class", "axis")
+            .attr("id", "y-axis2");
+
+        // All but call the x-axis
+        svg2.append("g")
+            .attr("class", "axis")
+            .attr("id", "x-axis2")
+            .attr("transform", "translate(0," + svg_height + ")");
+
+        svg3.append("g")
+            .attr("class", "axis")
+            .attr("id", "y-axis3");
+
+        svg3.append("g")
+            .attr("class", "axis")
+            .attr("id", "x-axis3")
+            .attr("transform", "translate(0," + svg_height + ")")
+
+
+        // Define a fucntion to draw a simple bar chart
+        function generateVis() {
+            var temp;
+            /******** PERFORM DATA JOIN ************/
+            // Join new data with old elements, if any.
+            var filtered_dataset = dataset.filter(yearFilter);
+            var filtered_dataset4 = dataset.filter(yearFiltertrace);
+            var filtered_datforbar = filtered_dataset.filter(yearFiltertrace2);
+            var country = svg.selectAll("circle")
+                .data(filtered_dataset);
+            var countrytxt = svg.selectAll("#text1")
+                .data(filtered_dataset);
+            var countrytrace = svg2.selectAll("circle")
+                .data(filtered_dataset4);
+            var countrytxtrace = svg2.selectAll("#text2")
+                .data(filtered_dataset4);
+            var barchart = new Array
+            pillarname.forEach(function(d) {
+                barchart.push(svg3.selectAll("rect").select(d)
+                    .data(filtered_datforbar));
+            })
+            var count = 0,
+                sel, sel2;
+
+            pillarname.forEach(function(p) {
+                barchart[count].enter()
+                    .append("rect")
+                    .attr("id", p)
+                    .attr("x", function(d) {
+                        var sel = document.getElementById('dropdownb2');
+                        if (sel.value == d.Country) {
+                            return 40 + xScale2(p)
+                        } else {
+                            return xScale2(p)
+                        }
+                    })
+                    .attr("y", function(d) {
+                        return yScale2(+d[p]);
+                    })
+                    .attr("width", 30)
+                    .attr("height", function(d) {
+                        return svg_height - yScale2(+d[p]);
+                    })
+                    .attr("fill", function(d) {
+                        sel = document.getElementById('dropdownb');
+                        if (d.Country == sel.value) {
+                            return "rgb(0, 30, 160)"
+                        } else {
+                            return "Crimson"
+                        }
+                    })
+
+                barchart[count].attr("x", function(d) {
+                        var sel = document.getElementById('dropdownb2');
+                        if (sel.value == d.Country) {
+                            return 40 + xScale2(p)
+                        } else {
+                            return xScale2(p)
+                        }
+                    })
+                    .attr("y", function(d) {
+                        return yScale2(+d[p]);
+                    })
+                    .attr("width", 30)
+                    .attr("height", function(d) {
+                        return svg_height - yScale2(+d[p]);
+                    })
+                    .attr("fill", function(d) {
+                        sel = document.getElementById('dropdownb');
+                        if (d.Country == sel.value) {
+                            return "rgb(0, 30, 160)"
+                        } else {
+                            return "Crimson"
+                        }
+                    })
+
+
+
+
+                barchart[count].exit().remove();
+                count++;
+            })
+            if (count > 12) {
+                barchart.exit().remove();
+                delete barchart;
+                count = 0;
+            }
+            var sel = document.getElementById('dropdownb');
+
+            countrytrace.enter()
+                //.data(dataset)
+                .append("circle")
+                .attr("cx", function(d) {
+                    //return xScale(Math.log(d.GDP,power));
+                    return xScale(d.GDP);
+                })
+                .attr("cy", function(d) {
+                    return yScale(d.Global_Competitiveness_Index);
+                })
+                .attr("r", function(d) {
+                    return 1 + rScale(d.Population);
+                })
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("fill", function(d) {
+                    if (d.Forum_classification == "Europe and North America") {
+                        return "LightBlue";
+                    }
+                    if (d.Forum_classification == "Eurasia") {
+                        return "Crimson";
+                    }
+                    if (d.Forum_classification == "Sub-Saharan Africa") {
+                        return "rgb(0, 30, 160)"
+                    }
+                    if (d.Forum_classification == "Latin America and the Caribbean") {
+                        return "rgb(145, 30, 180)"
+                    }
+                    if (d.Forum_classification == "East Asia and Pacific") {
+                        return "LightGreen";
+                    }
+                    if (d.Forum_classification == "South Asia") {
+                        return "rgb(210, 245, 60)";
+                    }
+                    if (d.Forum_classification == "Middle East and North Africa") {
+                        return "Gold";
+                    }
+                })
+
+            countrytxtrace.enter().append("text").attr("id", "text2").attr("x", function(d) {
+                    return xScale(d.GDP)
+                })
+                .attr("y", function(d) {
+                    return yScale(d.Global_Competitiveness_Index)
+                })
+                .text(function(d) {
+                    return d.Country + "   " + d.Year;
+                })
+                .attr("font-size", function(d) {
+                    if (sel.value == d.Country) {
+                        return 1 + tScale(d.Population)
+                    } else {
+                        return 0;
+                    }
+                }).append("svg2:title")
+                .text(function(d) {
+                    sel = document.getElementById('dropdownb');
+                    if (d.Country == sel.value) {
+                        return d.Country + d.Year
+                    }
+                })
+
+            countrytxtrace.attr("x", function(d) {
+                    return xScale(d.GDP)
+                })
+                .attr("y", function(d) {
+                    return yScale(d.Global_Competitiveness_Index)
+                })
+                .text(function(d) {
+                    return d.Country + "   " + d.Year;
+                })
+                .attr("font-size", function(d) {
+                    if (sel.value == d.Country) {
+                        return tScale(d.Population) + 1
+                    } else {
+                        return 0;
+                    }
+                })
+
+            country.enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                    //return xScale(Math.log(d.GDP,power));
+                    return xScale(d.GDP);
+                })
+                .attr("cy", function(d) {
+                    return yScale(d.Global_Competitiveness_Index);
+                })
+                .attr("r", function(d) {
+                    return rScale(d.Population);
+                })
+                .attr("stroke", "black")
+                .attr("stroke-width", 1)
+                .attr("fill", function(d) {
+                    if (d.Forum_classification == "Europe and North America") {
+                        return "LightBlue";
+                    }
+                    if (d.Forum_classification == "Eurasia") {
+                        return "Crimson";
+                    }
+                    if (d.Forum_classification == "Sub-Saharan Africa") {
+                        return "rgb(0, 30, 160)"
+                    }
+                    if (d.Forum_classification == "Latin America and the Caribbean") {
+                        return "rgb(145, 30, 180)"
+                    }
+                    if (d.Forum_classification == "East Asia and Pacific") {
+                        return "LightGreen";
+                    }
+                    if (d.Forum_classification == "South Asia") {
+                        return "rgb(210, 245, 60)";
+                    }
+                    if (d.Forum_classification == "Middle East and North Africa") {
+                        return "Gold";
+                    }
+                })
+                .attr("opacity", .8)
+                .append("svg:title")
+                .text(function(d) {return d.Country+d.Year})
+
+            countrytxt.enter().append("text").attr("id", "text1").attr("x", function(d) {
+                    return xScale(d.GDP)
+                })
+                .attr("y", function(d) {
+                    return yScale(d.Global_Competitiveness_Index)
+                })
+                .text(function(d) {
+                    return d.Country;
+                })
+                .attr("font-size", function(d) {
+                    return tScale(d.Population)
+                })
+
+            countrytxt.attr("x", function(d) {
+                    return xScale(d.GDP)
+                })
+                .attr("y", function(d) {
+                    return yScale(d.Global_Competitiveness_Index)
+                })
+                .text(function(d) {
+                    return d.Country;
+                })
+                .attr("font-size", function(d) {
+                    return tScale(d.Population)
+                })
+            //  console.log(d.Year)
+            //  });
+            countrytxt.exit().remove()
+
+            country.transition()
+                .duration(500)
+                .ease(d3.easeLinear).attr("cx", function(d) {
+                    return xScale(d.GDP);
+                })
+                .attr("cy", function(d) {
+                    return yScale(+d.Global_Competitiveness_Index);
+                })
+                .attr("r", function(d) {
+                    return 1 + rScale(d.Population);
+                })
+                .attr("fill", function(d) {
+
+                    if (d.Forum_classification == "Europe and North America") {
+                        return "LightBlue";
+                    }
+                    if (d.Forum_classification == "Eurasia") {
+                        return "Crimson";
+                    }
+                    if (d.Forum_classification == "Sub-Saharan Africa") {
+                        return "rgb(0, 30, 160)"
+                    }
+                    if (d.Forum_classification == "Latin America and the Caribbean") {
+                        return "rgb(145, 30, 180)"
+                    }
+                    if (d.Forum_classification == "East Asia and Pacific") {
+                        return "LightGreen";
+                    }
+                    if (d.Forum_classification == "South Asia") {
+                        return "rgb(210, 245, 60)";
+                    }
+                    if (d.Forum_classification == "Middle East and North Africa") {
+                        return "Gold";
+                    }
+                    console.log(d.Forum_classification);
+                }).attr("opacity", .8);
+
+
+
             countrytrace.transition()
+                .duration(500)
+                .ease(d3.easeLinear).attr("cx", function(d) {
 
-            .duration(500)
-            .ease(d3.easeLinear).attr("cx", function(d) {
-            //  return xScale(Math.log(d.GDP,power));
-            return xScale(d.GDP);
-            })
-            .attr("cy", function(d) {
-              return yScale(+d.Global_Competitiveness_Index);
-            })
-            .attr("r", function(d) {
-              return rScale(d.Population);
-            })
-            .attr("fill",function(d){
+                    return xScale(d.GDP);
+                })
+                .attr("cy", function(d) {
+                    return yScale(+d.Global_Competitiveness_Index);
+                })
+                .attr("r", function(d) {
+                    return rScale(d.Population);
+                })
+                .attr("fill", function(d) {
+                    if (d.Forum_classification == "Europe and North America") {
+                        return "LightBlue";
+                    }
+                    if (d.Forum_classification == "Eurasia") {
+                        return "Crimson";
+                    }
+                    if (d.Forum_classification == "Sub-Saharan Africa") {
+                        return "rgb(0, 30, 160)"
+                    }
+                    if (d.Forum_classification == "Latin America and the Caribbean") {
+                        return "rgb(145, 30, 180)"
+                    }
+                    if (d.Forum_classification == "East Asia and Pacific") {
+                        return "LightGreen";
+                    }
+                    if (d.Forum_classification == "South Asia") {
+                        return "rgb(210, 245, 60)";
+                    }
+                    if (d.Forum_classification == "Middle East and North Africa") {
+                        return "Gold";
+                    }
+                    console.log(d.Forum_classification);
+                }).attr("opacity", .8);
 
-                if(d.Forum_classification=="Europe and North America")
-                {
-                return "LightBlue";
-                }
-                if(d.Forum_classification=="Eurasia")
-                {return "Crimson";}
-                if(d.Forum_classification=="Sub-Saharan Africa")
-                {return "rgb(0, 30, 160)"}
-                if(d.Forum_classification=="Latin America and the Caribbean")
-                {
-                  return "rgb(145, 30, 180)"}
-                if(d.Forum_classification=="East Asia and Pacific")
-                {return "LightGreen";}
-                if(d.Forum_classification=="South Asia")
-                {
-                  return "rgb(210, 245, 60)";}
-              if(d.Forum_classification=="Middle East and North Africa")
-                  {return "Gold";}
-                    console.log(d.Forum_classification);}).attr("opacity",.8);
+            /******** HANDLE EXIT SELECTION ************/
+            // Remove country that not longer have a matching data eleement
+            country.exit().remove()
 
-      /******** HANDLE EXIT SELECTION ************/
-      // Remove country that not longer have a matching data eleement
-      country.exit().remove();
+                    countrytrace.exit().remove()
+            d3.select("#year_header").text("Year: " + display_year)
 
-        dataset.forEach(function(d) {if(sel.value!=d.Country){
-countrytrace.exit().remove()
-      }});
-      // Set the year label
-      d3.select("#year_header").text("Year: " + display_year)
-
-    }
-var power =123;
-
+        }
+        var power = 123;
     </script>
-  </div>
+    </div>
 </body>
 
 </html>
